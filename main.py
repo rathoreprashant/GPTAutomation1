@@ -4,6 +4,8 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.common.exceptions import StaleElementReferenceException, TimeoutException
+from selenium import webdriver
+
 import time
 import logging
 import openai
@@ -48,20 +50,22 @@ def summarize_text(text, prompt=None):
         logging.error("OpenAI API Error: %s", response.text)
         return None
 
+# Rest of your imports and code...
+
 @app.post("/download_caption/")
 async def download_caption(request: LoomRequest):
     data = []
     
     # Initialize the driver
-    driver = webdriver_config() 
+    options = webdriver.ChromeOptions()
+    options.add_argument('--headless')  # Run Chrome in headless mode
+    driver = webdriver.Chrome(options=options)
     
-
     wait = WebDriverWait(driver, 10)
     
     driver.get(request.video_url)
     logging.debug(f'Navigating to video URL: {request.video_url}')
     
-   
     try:
         transcript_button = wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, '[data-testid="sidebar-tab-Transcript"]')))
         transcript_button.click()
@@ -71,6 +75,7 @@ async def download_caption(request: LoomRequest):
         driver.quit()
         return {"error": "Transcript button not found or not clickable."}
     
+    # Rest of your code...    
     # Wait for the transcript section to be visible
     try:
         transcripts = wait.until(EC.visibility_of_all_elements_located((By.CLASS_NAME, 'transcript-list_transcript_1tw')))
