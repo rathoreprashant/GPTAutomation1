@@ -58,22 +58,34 @@ async def download_caption(request: LoomRequest):
     
     # Initialize the driver
     options = webdriver.ChromeOptions()
-    options.add_argument('--headless')  # Run Chrome in headless mode
+    options.add_argument("--headless")
+    options.add_argument("--disable-blink-features=AutomationControlled")
+    options.add_experimental_option("excludeSwitches", ["enable-automation"])
+    options.add_experimental_option("useAutomationExtension", False)
+    options.add_argument("--window-size=1920,1200")
+    options.add_argument("--disable-notifications")
     driver = webdriver.Chrome(options=options)
     
-    wait = WebDriverWait(driver, 10)
+    wait = WebDriverWait(driver, 20)
     
     driver.get(request.video_url)
     logging.debug(f'Navigating to video URL: {request.video_url}')
+    time.sleep(30)
     
     try:
         transcript_button = wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, '[data-testid="sidebar-tab-Transcript"]')))
+        tanscript_location = transcript_button.location
+        x_coordinate = tanscript_location['x']
+        y_coordinate = tanscript_location['y']
+        logging.debug(f'Element coordinates<<<<<<------->>>>>>: x={x_coordinate}, y={y_coordinate}')
         transcript_button.click()
+    
         logging.debug("Clicked on the Transcript button")
     except TimeoutException:
         logging.error("Timeout: Transcript button not found or not clickable.")
         driver.quit()
         return {"error": "Transcript button not found or not clickable."}
+
     
     # Rest of your code...    
     # Wait for the transcript section to be visible
@@ -115,5 +127,6 @@ async def download_caption(request: LoomRequest):
     loom_summary = "\n".join(data)
     chatgpt_response = summarize_text(loom_summary, request.prompt)
     logging.debug(f'proposal made: {chatgpt_response}')
-    
+    # loom_summary = "copy_button"
+    # chatgpt_response = "summarize_text(loom_summary, request.prompt)"
     return {"loom_summary": loom_summary, "chatgpt_response": chatgpt_response}
