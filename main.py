@@ -22,33 +22,34 @@ openai.api_key = os.getenv("OPENAI_API_KEY", "default_openai_api_key")
 
 class LoomRequest(BaseModel):
     video_url: str
-    prompt: str
+    # prompt: str
 
 logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
 
-def summarize_text(text, prompt=None):
-    default_prompt = "summarize and make proposal from this text and it should look professional"
-    prompt_to_use = prompt if prompt else default_prompt
+# GPT RESPONSE
+# def summarize_text(text, prompt=None):
+#     default_prompt = "summarize and make proposal from this text and it should look professional"
+#     prompt_to_use = prompt if prompt else default_prompt
     
-    headers = {
-        "Content-Type": "application/json",
-        "Authorization": f"Bearer {openai.api_key}"
-    }
-    data = {
-        "model": "gpt-3.5-turbo",
-        "messages": [
-            {"role": "system", "content": "You are a helpful assistant."},
-            {"role": "user", "content": prompt_to_use + "\n" + text}
-        ]
-    }
-    response = requests.post("https://api.openai.com/v1/chat/completions", json=data, headers=headers)
+#     headers = {
+#         "Content-Type": "application/json",
+#         "Authorization": f"Bearer {openai.api_key}"
+#     }
+#     data = {
+#         "model": "gpt-3.5-turbo",
+#         "messages": [
+#             {"role": "system", "content": "You are a helpful assistant."},
+#             {"role": "user", "content": prompt_to_use + "\n" + text}
+#         ]
+#     }
+#     response = requests.post("https://api.openai.com/v1/chat/completions", json=data, headers=headers)
    
-    # Check if the request was successful
-    if response.status_code == 200:
-        return response.json()["choices"][0]["message"]["content"]
-    else:
-        logging.error("OpenAI API Error: %s", response.text)
-        return None
+#     # Check if the request was successful
+#     if response.status_code == 200:
+#         return response.json()["choices"][0]["message"]["content"]
+#     else:
+#         logging.error("OpenAI API Error: %s", response.text)
+#         return None
 
 # Rest of your imports and code...
 
@@ -125,8 +126,8 @@ async def download_caption(request: LoomRequest):
    
     logging.debug(f'Captions found: {data}')
     loom_summary = "\n".join(data)
-    chatgpt_response = summarize_text(loom_summary, request.prompt)
-    logging.debug(f'proposal made: {chatgpt_response}')
-    # loom_summary = "copy_button"
-    # chatgpt_response = "summarize_text(loom_summary, request.prompt)"
-    return {"loom_summary": loom_summary, "chatgpt_response": chatgpt_response}
+    # chatgpt_response = summarize_text(loom_summary, request.prompt)
+    # logging.debug(f'proposal made: {chatgpt_response}')
+    
+    # return {"loom_summary": loom_summary, "chatgpt_response": chatgpt_response}
+    return {"loom_summary": loom_summary}
