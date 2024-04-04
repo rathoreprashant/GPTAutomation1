@@ -71,7 +71,7 @@ async def download_caption(request: LoomRequest):
     
     driver.get(request.video_url)
     logging.debug(f'Navigating to video URL: {request.video_url}')
-    time.sleep(30)
+    time.sleep(10)
     
     try:
         transcript_button = wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, '[data-testid="sidebar-tab-Transcript"]')))
