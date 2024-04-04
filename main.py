@@ -71,7 +71,7 @@ async def download_caption(request: LoomRequest):
     
     driver.get(request.video_url)
     logging.debug(f'Navigating to video URL: {request.video_url}')
-    time.sleep(30)
+    # time.sleep(30)
     
     try:
         transcript_button = wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, '[data-testid="sidebar-tab-Transcript"]')))
@@ -113,7 +113,7 @@ async def download_caption(request: LoomRequest):
         except StaleElementReferenceException:
             continue
              
-    time.sleep(5)
+    # time.sleep(5)
     
     captions = driver.find_elements(By.CLASS_NAME, 'css-y326tu')
     for caption in captions:
@@ -130,4 +130,4 @@ async def download_caption(request: LoomRequest):
     # logging.debug(f'proposal made: {chatgpt_response}')
     
     # return {"loom_summary": loom_summary, "chatgpt_response": chatgpt_response}
-    return {"loom_summary": loom_summary}
+    return {"loom_Transcript": loom_summary}
