@@ -13,6 +13,7 @@ import requests
 from webdriver_confi import webdriver_config
 from dotenv import load_dotenv
 import os
+import pyperclip
 
 # Load environment variables from .env file
 load_dotenv()
@@ -71,8 +72,7 @@ async def download_caption(request: LoomRequest):
     
     driver.get(request.video_url)
     logging.debug(f'Navigating to video URL: {request.video_url}')
-    time.sleep(10)
-    
+
     try:
         transcript_button = wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, '[data-testid="sidebar-tab-Transcript"]')))
         tanscript_location = transcript_button.location
@@ -87,47 +87,64 @@ async def download_caption(request: LoomRequest):
         driver.quit()
         return {"error": "Transcript button not found or not clickable."}
 
-    
-    # Rest of your code...    
-    # Wait for the transcript section to be visible
     try:
-        transcripts = wait.until(EC.visibility_of_all_elements_located((By.CLASS_NAME, 'transcript-list_transcript_1tw')))
+        copy_button = wait.until(EC.element_to_be_clickable((By.XPATH, '//*[@id="activity-sidebar-container"]/div[2]/div[2]/div/div[1]/div/div/div/div/div[2]/button')))
+        copy_button.click()
+        logging.debug("Clicked on the copy Transcript button")
     except TimeoutException:
-        logging.error("Timeout: Transcript not found.")
+        logging.error("Timeout: copy Transcript button not found or not clickable.")
         driver.quit()
-        return {"error": "Transcript not found."}
-    
-    # Wait for the caption elements to be visible within the transcript section
+        return {"error": "Copy Transcript button not found or not clickable."}
+
     try:
-        captions = wait.until(EC.visibility_of_all_elements_located((By.CLASS_NAME, 'css-y326tu')))
-        logging.debug("Captions found")
+        # Wait for a moment to allow the transcript to be copied
+        time.sleep(1)
+        
+        # Extract text directly from the transcript section
+        transcript_elements = wait.until(EC.visibility_of_all_elements_located((By.CLASS_NAME, 'transcript-list_transcript_1tw')))
+        for element in transcript_elements:
+            data.append(element.text)
     except TimeoutException:
-        logging.error("Timeout: Captions not found.")
+        logging.error("Timeout: Transcript elements not found.")
         driver.quit()
-        return {"error": "Captions not found."}
-    
-    # Scroll into view for each caption element
-    for caption in captions:
-        try:
-            driver.execute_script("arguments[0].scrollIntoView();", caption)
-        except StaleElementReferenceException:
-            continue
-             
-    # time.sleep(5)
-    
-    captions = driver.find_elements(By.CLASS_NAME, 'css-y326tu')
-    for caption in captions:
-        try:
-            data.append(caption.text)
-        except StaleElementReferenceException:
-            continue
-    
+        return {"error": "Transcript elements not found."}
+
     driver.quit()
-   
-    logging.debug(f'Captions found: {data}')
-    loom_summary = "\n".join(data)
-    # chatgpt_response = summarize_text(loom_summary, request.prompt)
-    # logging.debug(f'proposal made: {chatgpt_response}')
+    loom_transcript = "\n".join(data)
+    return {"loom_transcript": loom_transcript}
     
-    # return {"loom_summary": loom_summary, "chatgpt_response": chatgpt_response}
-    return {"loom_Transcript": loom_summary}
+    # # Wait for the caption elements to be visible within the transcript section
+    # try:
+    #     captions = wait.until(EC.visibility_of_all_elements_located((By.CLASS_NAME, 'css-y326tu')))
+    #     logging.debug("Captions found")
+    # except TimeoutException:
+    #     logging.error("Timeout: Captions not found.")
+    #     driver.quit()
+    #     return {"error": "Captions not found."}
+    
+    # # Scroll into view for each caption element
+    # for caption in captions:
+    #     try:
+    #         driver.execute_script("arguments[0].scrollIntoView();", caption)
+    #     except StaleElementReferenceException:
+    #         continue
+             
+    # # time.sleep(5)
+    
+    # captions = driver.find_elements(By.CLASS_NAME, 'css-y326tu')
+    # for caption in captions:
+    #     try:
+    #         data.append(caption.text)
+    #     except StaleElementReferenceException:
+    #         continue
+    
+    # driver.quit()
+    # loom_transcript= copied_text
+    # # logging.debug(f'Captions found: {data}')
+    # # loom_summary = "\n".join(data)
+    # # chatgpt_response = summarize_text(loom_summary, request.prompt)
+    # # logging.debug(f'proposal made: {chatgpt_response}')
+    
+    # # return {"loom_summary": loom_summary, "chatgpt_response": chatgpt_response}
+    # # return {"loom_Transcript": loom_summary}
+    # return {"loom_transcript": loom_transcript}
